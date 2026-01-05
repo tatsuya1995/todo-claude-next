@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Todo {
   id: number;
@@ -8,9 +8,30 @@ interface Todo {
   completed: boolean;
 }
 
+const STORAGE_KEY = "todo-app-data";
+
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const savedTodos = localStorage.getItem(STORAGE_KEY);
+    if (savedTodos) {
+      try {
+        setTodos(JSON.parse(savedTodos));
+      } catch (error) {
+        console.error("Failed to load todos from localStorage:", error);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+    }
+  }, [todos, isLoaded]);
 
   const addTodo = () => {
     if (inputValue.trim() === "") return;
